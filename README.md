@@ -5,8 +5,8 @@
 * The other file will execute behind background.
 
 * technique
-- ELF architecture
-- C file r/w
+  - ELF architecture
+  - C file r/w
 
 * Here, I will uploade someday.
 * It's a small tool with little sizes.
