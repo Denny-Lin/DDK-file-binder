@@ -24,4 +24,4 @@
 * Here, I will uploade someday.
 * It's a small tool with little sizes.
 * I thought of this function and made it in my fare time.
-* Even no one teach, you still can create any thing you like. 
+* Even no one teach you, you still can create any thing you like. 
