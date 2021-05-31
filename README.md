@@ -7,6 +7,14 @@
 * The other file will execute behind background.
 <br><br/>
 
+## Platforms
+* windows, Linux 
+<br><br/>
+
+## Languages
+* C, C++
+<br><br/>
+
 ## Techniques
   - ELF architecture
   - C file r/w
