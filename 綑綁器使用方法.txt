@@ -1,0 +1,65 @@
+fack_target.exe = target.exe | test1.exe | test2.exe | Len1 | Len2
+一個執行檔，產生兩個執行檔 : 綁定helloworld.exe 和 hacked.exe，並同時執行
+0.
+  打開main並稍微修改，編譯
+
+1.
+  讀取 helloworld.exe + hacked.exe 的各別程式長度(byte)，
+  並產生60bytes的Len1 | Len2記錄檔，
+  接著合併3個檔案，輸出tmp.exe = test1.exe | test2.exe | 60bytes
+2.
+  合併target.exe和tmp.exe並產生fack_target.exe 
+  執行target.exe 生成 facked_target.exe , f1.exe , f2.exe，並執行facked_target.exe
+  第二次執行facked_target.exe時，如果沒有刪除f1.exe +f2.exe 就不再產生 f1.exe ,   f2.exe，如果刪除其中一個也不會再產生facked_target.exe，因為裡面有判斷  facked_target.exe是否存在
+
+------------------------------------------------------------------------------
+以下為網路上的文章，他只提了幾個觀念:
+
+  文件捆綁可以用在很多地方，比如木馬。也可以在發行軟件的時候把DLL捆綁在EXE文件後面，然後在EXE執行的時候動態調用DLL等等。。
+
+  編譯環境：WIN2K+VC6。
+
+  先假設我們要把test1.exe和test2.exe這兩個文件捆綁成target.exe這一個文件，然後在運行target.exe的時候實現同時運行test1.exe和test2.exe。
+
+  提一個小常識，PE格式的文件只要不修改文件頭和文件中間的內容，而只是在文件末尾添加數據，那麼這個PE文件可以正常執行。你可以試一試在命令行方式下執行copy test1.exe+test2.exe，命令執行完成後，test2.exe被添加到test1.exe文件尾，執行合併後的test1.exe雖然正常，但是test2. exe得不到執行。OK，這就是我們今天要解決的問題。我的想法是這樣的。把三個文件捆綁在一起，捆綁後target.exe實際包含三個文件，其中aaa.exe是我們自己寫的程序，test1.exe和test2.exe是我們要捆綁的程序。
+
+  結構如下
+
+  ---------------------------------------
+  |aaa.exe|test1.exe|test2. exe|
+  ---------------------------------------
+
+  整個文件就叫target.exe，如果結構如上所示，那麼我們執行target.exe的時候實際上只有aaa.exe才會得到執行，這裡的aaa.exe是我們自己寫的，我們就讓aaa.exe多做點事，他要做的事就是：1、把test2.exe讀出來另存為c: est2.exe，把test1.exe的內容讀出來另存為c: est1.exe。2、調用CreateProcess來創建兩個新進程運行test1.exe和test2.exe。3、調用ExitProcess結束自身的進程。
+
+  這樣一來我們的目的就達到了。同時為了隱蔽起見，我們可以把aaa.exe的窗口界面不顯示出來。
+
+  但是又有一個問題，讀取的時候怎樣才能分辨出哪一段數據是test1.exe，哪一段數據是test2.exe？那我們就再想辦法把上面的結構再擴充一下。
+
+-------------------------------------------------- ---
+  |aaa.exe|test1.exe|test2.exe|len2|len1|
+  ------------------------------ -----------------------
+
+  在文件最後面再加兩段數據，分別用來存放test1.exe的文件長度和test2.exe的文件長度。並且固定len2和len1為30字節的長度。這樣在aaa.exe得到執行的時候先後面的兩個30字節內容，內容就是兩個文件的長度，再根據這兩個長度就可以準確讀取到test1.exe和test1.exe的內容。
+ 
+  看看aaa.exe程序的關鍵代碼：
+
+　　　　CFile fSource(_pgmptr,CFile::modeRead | CFile::modeNoTruncate); //得到target.exe的文件長度
+　　　　int iSourceLength = fSource.GetLength();
+　　　　fSource.Seek(iSourceLength-60,CFile::begin);//移動文件指針到第test2.exe文件的末尾
+
+　　　　char buffer[40];
+　　　　ZeroMemory(buffer,40);
+　　　　fSource.Read(buffer,30);//讀取第len2的內容，也就是test2.exe的長度
+
+　　　　int iTargetLength = atoi(buffer);
+　　　　fSource.Seek(iSourceLength-iTargetLength-60,CFile::begin);//移動文件指針到test2.exe文件的開頭
+
+　　　　CFile fTarget("c: est2.exe",CFile::modeCreate | CFile::modeWrite |
+
+  CFile::modeNoTruncate);//創建一個新文件為c: est2.exe
+
+　　　　char *pBuffer = new char[iTargetLength];//分配緩衝區
+　　　　ZeroMemory(pBuffer,iTargetLength);
+　　　　fSource.Read(pBuffer,iTargetLength);//將第test2.exe文件讀到緩衝區
+　　　　fTarget.Write(pBuffer,iTargetLength );//將緩衝區內容寫入c: est2.exe
+　　　　delete []pBuffer;
