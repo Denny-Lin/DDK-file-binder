@@ -1,11 +1,11 @@
 # DDK-file-binder
 
-> Do not use this tool to bind or distribute any malicious files.
+> A personal tool to combine two executable files into one and run them simultaneously. **Do not use for malicious purposes.**
 
 ## Features
 - Combines two files into a single executable.  
-- When executed, the first file runs normally, and the second file runs in the background.  
-- Lightweight and simple to use.
+- When executed, the first file runs normally, and the second runs in the background.  
+- Lightweight and easy to use.
 
 ## Platforms
 - Windows  
@@ -16,10 +16,9 @@
 - C++
 
 ## Techniques
-- ELF architecture (for Linux)  
-- File read/write operations in C
+- ELF architecture (Linux)  
+- File read/write operations in C/C++
 
 ## Notes
-- This is a small, personal project created in my free time.  
-- Even without formal guidance, you can explore and create your own tools and projects.
-
+- Developed as a small personal project in my free time.  
+- Encourages exploring and creating tools independently, even without formal guidance.
